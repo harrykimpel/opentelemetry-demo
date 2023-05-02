@@ -8,6 +8,12 @@ const opentelemetry = require('@opentelemetry/api')
 const charge = require('./charge')
 const logger = require('./logger')
 
+function getRandomIntInclusive(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1) + min); // The maximum is inclusive and the minimum is inclusive
+}
+
 function chargeServiceHandler(call, callback) {
   const span = opentelemetry.trace.getActiveSpan();
 
@@ -16,6 +22,9 @@ function chargeServiceHandler(call, callback) {
     span.setAttributes({
       'app.payment.amount': parseFloat(`${amount.units}.${amount.nanos}`)
     })
+    span.setAttributes({
+      'enduser.id': getRandomIntInclusive(1, 100)
+    });
     logger.info({ request: call.request }, "Charge request received.")
 
     const response = charge.charge(call.request)

@@ -6,8 +6,10 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -190,8 +192,10 @@ func (p *productCatalog) ListProducts(ctx context.Context, req *pb.Empty) (*pb.L
 
 func (p *productCatalog) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.Product, error) {
 	span := trace.SpanFromContext(ctx)
+	rndUser := strconv.Itoa(rand.Intn(100))
 	span.SetAttributes(
 		attribute.String("app.product.id", req.Id),
+		attribute.String("enduser.id", rndUser),
 	)
 
 	// GetProduct will fail on a specific product when feature flag is enabled

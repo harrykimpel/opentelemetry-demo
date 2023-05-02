@@ -149,6 +149,8 @@ public final class AdService {
 
         span.setAttribute("app.ads.contextKeys", req.getContextKeysList().toString());
         span.setAttribute("app.ads.contextKeys.count", req.getContextKeysCount());
+        Random rn = new Random();
+        span.setAttribute("enduser.id", rn.nextInt((100+1) - 0) + 0);
         if (req.getContextKeysCount() > 0) {
           logger.info("Targeted ad request received for " + req.getContextKeysList());
           for (int i = 0; i < req.getContextKeysCount(); i++) {
@@ -215,6 +217,8 @@ public final class AdService {
   private Collection<Ad> getAdsByCategory(@SpanAttribute("app.ads.category") String category) {
     Collection<Ad> ads = adsMap.get(category);
     Span.current().setAttribute("app.ads.count", ads.size());
+    Random rn = new Random();
+    Span.current().setAttribute("enduser.id", rn.nextInt((100+1) - 0) + 0);
     return ads;
   }
 
@@ -235,7 +239,8 @@ public final class AdService {
         ads.add(Iterables.get(allAds, random.nextInt(allAds.size())));
       }
       span.setAttribute("app.ads.count", ads.size());
-
+      Random rn = new Random();
+      span.setAttribute("enduser.id", rn.nextInt((100+1) - 0) + 0);
     } finally {
       span.end();
     }
