@@ -379,7 +379,8 @@ services:
       - LOCUST_HOST
       - LOCUST_HEADLESS
       - LOCUST_AUTOSTART
-      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:4318/v1/traces
+      - OTEL_EXPORTER_OTLP_ENDPOINT
+      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=loadgenerator
       - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
@@ -465,6 +466,7 @@ services:
       - QUOTE_SERVICE_PORT
       - OTEL_RESOURCE_ATTRIBUTES
       - OTEL_SERVICE_NAME=quoteservice
+      - OTEL_PHP_INTERNAL_METRICS_ENABLED=true
     depends_on:
       otelcol:
         condition: service_started
@@ -605,7 +607,7 @@ services:
   # ********************
   # Jaeger
   jaeger:
-    image: jaegertracing/all-in-one
+    image: jaegertracing/all-in-one:1.48.0
     container_name: jaeger
     command:
       - "--memory.max-traces"
@@ -620,7 +622,7 @@ services:
           memory: 300M
     restart: unless-stopped
     ports:
-      - "${JAEGER_SERVICE_PORT}"                    # Jaeger UI
+      - "${JAEGER_SERVICE_PORT}"         # Jaeger UI
       - "4317"                           # OTLP gRPC default port
     environment:
       - COLLECTOR_OTLP_ENABLED=true
@@ -629,7 +631,7 @@ services:
 
   # Grafana
   grafana:
-    image: grafana/grafana:9.4.7
+    image: grafana/grafana:10.1.0
     container_name: grafana
     deploy:
       resources:
@@ -644,7 +646,7 @@ services:
 
   # OpenTelemetry Collector
   otelcol:
-    image: otel/opentelemetry-collector-contrib:0.76.1
+    image: otel/opentelemetry-collector-contrib:0.84.0
     container_name: otel-col
     deploy:
       resources:
@@ -667,7 +669,7 @@ services:
 
   # Prometheus
   prometheus:
-    image: quay.io/prometheus/prometheus:v2.43.0
+    image: quay.io/prometheus/prometheus:v2.46.0
     container_name: prometheus
     command:
       - --web.console.templates=/etc/prometheus/consoles
@@ -761,6 +763,7 @@ services:
       - PRODUCT_CATALOG_SERVICE_ADDR
       - RECOMMENDATION_SERVICE_ADDR
       - SHIPPING_SERVICE_ADDR
+      - KAFKA_SERVICE_ADDR
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
@@ -788,6 +791,10 @@ services:
       shippingservice:
         condition: service_started
       quoteservice:
+        condition: service_started
+      accountingservice:
+        condition: service_started
+      frauddetectionservice:
         condition: service_started
 
   tracetest-server:
@@ -818,8 +825,6 @@ services:
       interval: 1s
       timeout: 3s
       retries: 60
-    environment:
-      TRACETEST_DEV: ${TRACETEST_DEV}
 
   tracetest-postgres:
     image: postgres:14
