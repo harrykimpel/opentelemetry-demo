@@ -1,0 +1,31 @@
+components:
+  frontendProxy:
+    service:
+      type: LoadBalancer
+  frontend:
+    resources:
+      limits:
+        memory: 400Mi
+
+opentelemetry-collector:
+  config:
+    exporters:
+      otlphttp/newrelic:
+        endpoint: https://otlp.nr-data.net:4317
+        headers:
+          api-key: ${NEW_RELIC_LICENSE_KEY}
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlphttp/newrelic]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlphttp/newrelic]
+        logs:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlphttp/newrelic]
