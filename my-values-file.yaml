@@ -13,7 +13,7 @@ opentelemetry-collector:
       otlphttp/newrelic:
         endpoint: https://otlp.nr-data.net:4317
         headers:
-          api-key: ${NEW_RELIC_LICENSE_KEY}
+          api-key: NEW_RELIC_LICENSE_KEY
 
     service:
       pipelines:
